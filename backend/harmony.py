@@ -1,7 +1,6 @@
 """
 Harmony Engine - Generates chord suggestions based on music theory
 """
-from typing import List, Dict
 from collections import Counter
 
 
@@ -33,14 +32,14 @@ class HarmonyEngine:
         new_idx = (idx + semitones) % 12
         return self.NOTES[new_idx]
 
-    def build_major_scale(self, root: str) -> List[str]:
+    def build_major_scale(self, root: str) -> list[str]:
         """Build a major scale from a root note"""
         scale = []
         for interval in self.MAJOR_SCALE:
             scale.append(self.transpose_note(root, interval))
         return scale
 
-    def build_chord(self, root: str, quality: str) -> List[str]:
+    def build_chord(self, root: str, quality: str) -> list[str]:
         """Build a triad chord"""
         root_idx = self.get_note_index(root)
 
@@ -60,7 +59,7 @@ class HarmonyEngine:
 
         return chord_notes
 
-    def detect_key(self, melody_notes: List[str]) -> str:
+    def detect_key(self, melody_notes: list[str]) -> str:
         """
         Simple key detection: find which major key contains most of these notes
         """
@@ -80,7 +79,7 @@ class HarmonyEngine:
 
         return best_key
 
-    def get_chords_containing_note(self, note: str, key: str) -> List[Dict[str, any]]:
+    def get_chords_containing_note(self, note: str, key: str) -> list[dict[str, any]]:
         """
         Get all diatonic chords in the key that contain the given note
         """
@@ -113,8 +112,8 @@ class HarmonyEngine:
             return f"{root}°"
         return root
 
-    def select_best_chord_progression(self, available_chords: List[List[Dict]],
-                                       melody_notes: List[str]) -> List[List[Dict]]:
+    def select_best_chord_progression(self, available_chords: list[list[dict]],
+                                       melody_notes: list[str]) -> list[list[dict]]:
         """
         Select the best 2 chord options for each note
         Prioritize: I, V, IV, vi, ii, iii, vii°
@@ -133,7 +132,7 @@ class HarmonyEngine:
 
         return result
 
-    def generate_chord_suggestions(self, melody_notes: List[str]) -> List[Dict]:
+    def generate_chord_suggestions(self, melody_notes: list[str]) -> list[dict]:
         """
         Main function: generate 2 chord suggestions for each note in the melody
         """

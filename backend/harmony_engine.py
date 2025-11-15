@@ -1,7 +1,7 @@
 """
 Moteur harmonique intelligent basé sur la théorie musicale
 """
-from typing import List, Dict, Optional
+from typing import Optional
 from music_theory import (
     GAMMES, PALETTES, FONCTIONS_MAJEUR, FONCTIONS_MINEUR,
     CONTENU_ACCORDS, normaliser_note, normaliser_note_enharmonique
@@ -14,7 +14,7 @@ class HarmonyEngineV2:
     def __init__(self):
         pass
 
-    def detecter_tonalite(self, liste_notes: List[str]) -> List[Dict[str, any]]:
+    def detecter_tonalite(self, liste_notes: list[str]) -> list[dict[str, any]]:
         """
         ALGORITHME 1: Détecteur de Tonalité
 
@@ -128,7 +128,7 @@ class HarmonyEngineV2:
         fonctions = FONCTIONS_MAJEUR if is_major else FONCTIONS_MINEUR
         return fonctions.get(degre, "Inconnu")
 
-    def _get_accords_by_fonction(self, fonction: str, tonalite: str) -> List[str]:
+    def _get_accords_by_fonction(self, fonction: str, tonalite: str) -> list[str]:
         """
         Retourne tous les accords d'une palette qui ont une fonction donnée.
 
@@ -168,7 +168,7 @@ class HarmonyEngineV2:
         note_actuelle: str,
         tonalite_choisie: str,
         accord_precedent: Optional[str] = None
-    ) -> List[Dict[str, any]]:
+    ) -> list[dict[str, any]]:
         """
         ALGORITHME 2: Moteur de Suggestion
 
@@ -264,9 +264,9 @@ class HarmonyEngineV2:
 
     def suggerer_accords_pour_melodie(
         self,
-        melodie: List[str],
+        melodie: list[str],
         tonalite_choisie: Optional[str] = None
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         Fonction principale pour suggérer des accords pour toute une mélodie.
 

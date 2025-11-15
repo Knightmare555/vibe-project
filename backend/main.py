@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import Optional
 from harmony_engine import HarmonyEngineV2
 
 app = FastAPI(title="Vibe - Chord Progression Generator")
@@ -19,7 +19,7 @@ harmony_engine = HarmonyEngineV2()
 
 
 class MelodyRequest(BaseModel):
-    notes: List[str]  # e.g., ["C4", "E4", "G4", "A4"]
+    notes: list[str]  # e.g., ["C4", "E4", "G4", "A4"]
     chosen_key: Optional[str] = None  # Tonalité choisie par l'utilisateur
 
 
@@ -30,20 +30,20 @@ class DetectedKey(BaseModel):
 
 class ChordOption(BaseModel):
     name: str
-    notes: List[str]
+    notes: list[str]
     quality: str
     reason: Optional[str] = None  # Raison de la suggestion
 
 
 class ChordSuggestion(BaseModel):
     note: str
-    chord_options: List[ChordOption]
+    chord_options: list[ChordOption]
 
 
 class SuggestionResponse(BaseModel):
-    detected_keys: List[DetectedKey]
+    detected_keys: list[DetectedKey]
     chosen_key: str
-    suggestions: List[ChordSuggestion]
+    suggestions: list[ChordSuggestion]
 
 
 @app.get("/")

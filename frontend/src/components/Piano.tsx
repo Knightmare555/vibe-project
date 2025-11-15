@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
+import { convertNoteToFrench } from '../utils/noteConverter';
 
 interface PianoProps {
   onNotePlay: (note: string) => void;
@@ -39,33 +40,36 @@ const Piano = ({ onNotePlay }: PianoProps) => {
 
   // Piano keys: 2 octaves (C4 to B5)
   const whiteKeys = [
-    { note: 'C4', label: 'C' },
-    { note: 'D4', label: 'D' },
-    { note: 'E4', label: 'E' },
-    { note: 'F4', label: 'F' },
-    { note: 'G4', label: 'G' },
-    { note: 'A4', label: 'A' },
-    { note: 'B4', label: 'B' },
-    { note: 'C5', label: 'C' },
-    { note: 'D5', label: 'D' },
-    { note: 'E5', label: 'E' },
-    { note: 'F5', label: 'F' },
-    { note: 'G5', label: 'G' },
-    { note: 'A5', label: 'A' },
-    { note: 'B5', label: 'B' },
+    { note: 'C4', label: 'Do' },
+    { note: 'D4', label: 'Ré' },
+    { note: 'E4', label: 'Mi' },
+    { note: 'F4', label: 'Fa' },
+    { note: 'G4', label: 'Sol' },
+    { note: 'A4', label: 'La' },
+    { note: 'B4', label: 'Si' },
+    { note: 'C5', label: 'Do' },
+    { note: 'D5', label: 'Ré' },
+    { note: 'E5', label: 'Mi' },
+    { note: 'F5', label: 'Fa' },
+    { note: 'G5', label: 'Sol' },
+    { note: 'A5', label: 'La' },
+    { note: 'B5', label: 'Si' },
   ];
 
+  // Calcul des positions des touches noires (à la frontière entre les touches blanches)
+  // 14 touches blanches, chaque touche = 100/14 = 7.14%
+  const keyWidth = 100 / 14; // 7.14%
   const blackKeys = [
-    { note: 'C#4', left: '7%' },
-    { note: 'D#4', left: '14%' },
-    { note: 'F#4', left: '28%' },
-    { note: 'G#4', left: '35%' },
-    { note: 'A#4', left: '42%' },
-    { note: 'C#5', left: '57%' },
-    { note: 'D#5', left: '64%' },
-    { note: 'F#5', left: '78%' },
-    { note: 'G#5', left: '85%' },
-    { note: 'A#5', left: '92%' },
+    { note: 'C#4', left: `${keyWidth * 1}%` },        // Entre C4 (0) et D4 (1)
+    { note: 'D#4', left: `${keyWidth * 2}%` },        // Entre D4 (1) et E4 (2)
+    { note: 'F#4', left: `${keyWidth * 4}%` },        // Entre F4 (3) et G4 (4)
+    { note: 'G#4', left: `${keyWidth * 5}%` },        // Entre G4 (4) et A4 (5)
+    { note: 'A#4', left: `${keyWidth * 6}%` },        // Entre A4 (5) et B4 (6)
+    { note: 'C#5', left: `${keyWidth * 8}%` },        // Entre C5 (7) et D5 (8)
+    { note: 'D#5', left: `${keyWidth * 9}%` },        // Entre D5 (8) et E5 (9)
+    { note: 'F#5', left: `${keyWidth * 11}%` },       // Entre F5 (10) et G5 (11)
+    { note: 'G#5', left: `${keyWidth * 12}%` },       // Entre G5 (11) et A5 (12)
+    { note: 'A#5', left: `${keyWidth * 13}%` },       // Entre A5 (12) et B5 (13)
   ];
 
   return (
@@ -77,14 +81,14 @@ const Piano = ({ onNotePlay }: PianoProps) => {
         Click on the keys to build your melody
       </p>
 
-      <div className="relative h-48 flex items-end">
+      <div className="relative h-48">
         {/* White keys */}
-        <div className="flex w-full">
+        <div className="flex w-full h-full">
           {whiteKeys.map((key) => (
             <button
               key={key.note}
               onClick={() => playNote(key.note)}
-              className="flex-1 h-40 bg-white border-2 border-gray-300 rounded-b-lg
+              className="flex-1 h-full bg-white border-2 border-gray-300 rounded-b-lg
                          hover:bg-gray-100 active:bg-gray-200 transition-colors
                          flex items-end justify-center pb-4 text-sm font-medium text-gray-700
                          shadow-md"
@@ -99,8 +103,11 @@ const Piano = ({ onNotePlay }: PianoProps) => {
           <button
             key={key.note}
             onClick={() => playNote(key.note)}
-            style={{ left: key.left }}
-            className="absolute h-24 w-10 bg-gray-900 rounded-b-lg
+            style={{
+              left: key.left,
+              transform: 'translateX(-50%)'
+            }}
+            className="absolute top-0 h-28 w-9 bg-gray-900 rounded-b-lg
                        hover:bg-gray-700 active:bg-gray-600 transition-colors
                        shadow-lg z-10"
           />

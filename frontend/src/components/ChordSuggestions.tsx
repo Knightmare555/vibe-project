@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import * as Tone from 'tone';
+import { convertNoteToFrench, convertChordNameToFrench } from '../utils/noteConverter';
 
 interface ChordOption {
   name: string;
@@ -60,7 +61,7 @@ const ChordSuggestions = ({ suggestions }: ChordSuggestionsProps) => {
         {suggestions.map((suggestion, index) => (
           <div key={index} className="border-l-4 border-indigo-500 pl-4">
             <div className="text-sm font-semibold text-gray-600 mb-2">
-              For note: <span className="text-indigo-700 text-lg">{suggestion.note}</span>
+              Pour la note : <span className="text-indigo-700 text-lg">{convertNoteToFrench(suggestion.note)}</span>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -74,13 +75,13 @@ const ChordSuggestions = ({ suggestions }: ChordSuggestionsProps) => {
                 >
                   <div className="flex flex-col items-center">
                     <span className="text-lg font-bold text-indigo-700 group-hover:text-indigo-900">
-                      {chord.name}
+                      {convertChordNameToFrench(chord.name)}
                     </span>
                     <span className="text-xs text-gray-500 mt-1">
-                      {chord.notes.join(' - ')}
+                      {chord.notes.map(convertNoteToFrench).join(' - ')}
                     </span>
                     <span className="text-xs text-gray-400 italic mt-1">
-                      {chord.quality}
+                      {chord.quality === 'major' ? 'majeur' : chord.quality === 'minor' ? 'mineur' : chord.quality === 'diminished' ? 'diminué' : chord.quality}
                     </span>
                   </div>
                   <div className="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-10

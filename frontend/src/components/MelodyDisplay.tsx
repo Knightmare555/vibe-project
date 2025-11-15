@@ -1,3 +1,5 @@
+import { convertNoteToFrench } from '../utils/noteConverter';
+
 interface MelodyDisplayProps {
   notes: string[];
   onClear: () => void;
@@ -43,7 +45,7 @@ const MelodyDisplay = ({ notes, onClear, onAnalyze, isLoading }: MelodyDisplayPr
                 className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg
                            font-semibold shadow-sm"
               >
-                {note}
+                {convertNoteToFrench(note)}
               </div>
             ))}
           </div>

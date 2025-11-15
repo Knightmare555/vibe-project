@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Piano from './components/Piano';
-import MelodyDisplay from './components/MelodyDisplay';
-import ChordSuggestions from './components/ChordSuggestions';
+import MelodyWithChords from './components/MelodyWithChords';
 
 interface ChordOption {
   name: string;
@@ -68,10 +67,10 @@ function App() {
             Vibe
           </h1>
           <p className="text-xl text-white/90">
-            Chord Progression Generator
+            Générateur de progressions d'accords
           </p>
           <p className="text-sm text-white/70 mt-2">
-            Play a melody and get harmonic chord suggestions
+            Jouez une mélodie et obtenez des suggestions d'accords harmoniques
           </p>
         </div>
 
@@ -80,10 +79,11 @@ function App() {
           <Piano onNotePlay={handleNotePlay} />
         </div>
 
-        {/* Melody Display */}
+        {/* Melody with Chords */}
         <div className="mb-6">
-          <MelodyDisplay
-            notes={melody}
+          <MelodyWithChords
+            melody={melody}
+            suggestions={suggestions}
             onClear={handleClear}
             onAnalyze={handleAnalyze}
             isLoading={isLoading}
@@ -93,24 +93,17 @@ function App() {
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-100 border-2 border-red-400 rounded-lg">
-            <p className="text-red-800 font-semibold">Error: {error}</p>
+            <p className="text-red-800 font-semibold">Erreur: {error}</p>
             <p className="text-red-600 text-sm mt-1">
-              Make sure the backend server is running on http://localhost:8000
+              Assurez-vous que le serveur backend tourne sur http://localhost:8000
             </p>
-          </div>
-        )}
-
-        {/* Chord Suggestions */}
-        {suggestions.length > 0 && (
-          <div className="mb-6">
-            <ChordSuggestions suggestions={suggestions} />
           </div>
         )}
 
         {/* Footer */}
         <div className="text-center mt-8 text-white/60 text-sm">
           <p>
-            Built with React, TypeScript, Tone.js, and FastAPI
+            Développé avec React, TypeScript, Tone.js et FastAPI
           </p>
         </div>
       </div>

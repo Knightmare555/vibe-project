@@ -78,7 +78,7 @@ const Piano = ({ onNotePlay }: PianoProps) => {
         Piano
       </h2>
       <p className="text-sm text-gray-600 mb-6 text-center">
-        Click on the keys to build your melody
+        Cliquez sur les touches pour composer votre mélodie
       </p>
 
       <div className="relative h-48">

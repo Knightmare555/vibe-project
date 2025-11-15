@@ -2,10 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import * as Tone from 'tone';
 import { convertNoteToFrench, convertChordNameToFrench } from '../utils/noteConverter';
 
+interface DetectedKey {
+  tonalite: string;
+  score: number;
+}
+
 interface ChordOption {
   name: string;
   notes: string[];
   quality: string;
+  reason?: string;
 }
 
 interface ChordSuggestion {
@@ -16,6 +22,8 @@ interface ChordSuggestion {
 interface MelodyWithChordsProps {
   melody: string[];
   suggestions: ChordSuggestion[];
+  detectedKeys: DetectedKey[];
+  chosenKey: string;
   onClear: () => void;
   onAnalyze: () => void;
   isLoading: boolean;
@@ -29,6 +37,8 @@ interface SelectedChord {
 const MelodyWithChords = ({
   melody,
   suggestions,
+  detectedKeys,
+  chosenKey,
   onClear,
   onAnalyze,
   isLoading
@@ -60,6 +70,13 @@ const MelodyWithChords = ({
       return prev.filter((sc) => sc.noteIndex < melody.length);
     });
   }, [melody.length]);
+
+  // Réinitialiser les sélections quand les suggestions changent (régénération)
+  useEffect(() => {
+    if (suggestions.length > 0) {
+      setSelectedChords([]);
+    }
+  }, [suggestions]);
 
   const toggleChord = (noteIndex: number, chordIndex: number) => {
     setSelectedChords((prev) => {
@@ -150,6 +167,22 @@ const MelodyWithChords = ({
         </div>
       </div>
 
+      {/* Detected Keys */}
+      {detectedKeys.length > 0 && (
+        <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+          <h4 className="font-semibold text-gray-800 mb-2">
+            Tonalité détectée : <span className="text-indigo-600">{chosenKey}</span>
+          </h4>
+          <div className="flex gap-3 text-sm">
+            {detectedKeys.map((key, index) => (
+              <span key={index} className="text-gray-600">
+                {key.tonalite} <span className="text-gray-400">({key.score.toFixed(1)})</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Melody with chords grid */}
       <div className="overflow-x-auto">
         <div className="inline-flex gap-2 min-w-full">
@@ -208,6 +241,11 @@ const MelodyWithChords = ({
                             <div className="text-xs text-gray-400 italic mt-1">
                               {qualityFr}
                             </div>
+                            {chord.reason && (
+                              <div className="text-xs text-indigo-600 mt-1 font-medium">
+                                {chord.reason}
+                              </div>
+                            )}
                           </div>
                         </label>
                       );

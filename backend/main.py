@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict
-from harmony import HarmonyEngine
+from typing import List, Dict, Optional
+from harmony_engine import HarmonyEngineV2
 
 app = FastAPI(title="Vibe - Chord Progression Generator")
 
@@ -15,17 +15,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-harmony_engine = HarmonyEngine()
+harmony_engine = HarmonyEngineV2()
 
 
 class MelodyRequest(BaseModel):
     notes: List[str]  # e.g., ["C4", "E4", "G4", "A4"]
+    chosen_key: Optional[str] = None  # Tonalité choisie par l'utilisateur
+
+
+class DetectedKey(BaseModel):
+    tonalite: str
+    score: float
 
 
 class ChordOption(BaseModel):
     name: str
     notes: List[str]
     quality: str
+    reason: Optional[str] = None  # Raison de la suggestion
 
 
 class ChordSuggestion(BaseModel):
@@ -33,18 +40,32 @@ class ChordSuggestion(BaseModel):
     chord_options: List[ChordOption]
 
 
+class SuggestionResponse(BaseModel):
+    detected_keys: List[DetectedKey]
+    chosen_key: str
+    suggestions: List[ChordSuggestion]
+
+
 @app.get("/")
 async def root():
     return {"message": "Vibe API is running"}
 
 
-@app.post("/suggest-chords", response_model=List[ChordSuggestion])
+@app.post("/suggest-chords", response_model=SuggestionResponse)
 async def suggest_chords(request: MelodyRequest):
     """
-    Given a melody (list of notes), suggest 2 chord options for each note.
+    Analyse une mélodie et suggère des accords intelligemment.
+
+    Retourne:
+    - Les 3 tonalités les plus probables
+    - La tonalité choisie (auto ou par l'utilisateur)
+    - Les suggestions d'accords par note avec explications
     """
-    suggestions = harmony_engine.generate_chord_suggestions(request.notes)
-    return suggestions
+    result = harmony_engine.suggerer_accords_pour_melodie(
+        melodie=request.notes,
+        tonalite_choisie=request.chosen_key
+    )
+    return result
 
 
 if __name__ == "__main__":

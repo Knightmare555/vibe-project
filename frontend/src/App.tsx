@@ -2,10 +2,16 @@ import { useState } from 'react';
 import Piano from './components/Piano';
 import MelodyWithChords from './components/MelodyWithChords';
 
+interface DetectedKey {
+  tonalite: string;
+  score: number;
+}
+
 interface ChordOption {
   name: string;
   notes: string[];
   quality: string;
+  reason?: string;
 }
 
 interface ChordSuggestion {
@@ -13,9 +19,17 @@ interface ChordSuggestion {
   chord_options: ChordOption[];
 }
 
+interface APIResponse {
+  detected_keys: DetectedKey[];
+  chosen_key: string;
+  suggestions: ChordSuggestion[];
+}
+
 function App() {
   const [melody, setMelody] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<ChordSuggestion[]>([]);
+  const [detectedKeys, setDetectedKeys] = useState<DetectedKey[]>([]);
+  const [chosenKey, setChosenKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +40,8 @@ function App() {
   const handleClear = () => {
     setMelody([]);
     setSuggestions([]);
+    setDetectedKeys([]);
+    setChosenKey('');
     setError(null);
   };
 
@@ -48,8 +64,10 @@ function App() {
         throw new Error('Failed to get chord suggestions');
       }
 
-      const data = await response.json();
-      setSuggestions(data);
+      const data: APIResponse = await response.json();
+      setSuggestions(data.suggestions);
+      setDetectedKeys(data.detected_keys);
+      setChosenKey(data.chosen_key);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching chord suggestions:', err);
@@ -84,6 +102,8 @@ function App() {
           <MelodyWithChords
             melody={melody}
             suggestions={suggestions}
+            detectedKeys={detectedKeys}
+            chosenKey={chosenKey}
             onClear={handleClear}
             onAnalyze={handleAnalyze}
             isLoading={isLoading}

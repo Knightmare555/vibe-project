@@ -17,6 +17,8 @@ interface ChordOption {
 interface ChordSuggestion {
   note: string;
   chord_options: ChordOption[];
+  detected_key: string;
+  key_candidates: DetectedKey[];
 }
 
 interface APIResponse {

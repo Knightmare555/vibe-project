@@ -17,6 +17,8 @@ interface ChordOption {
 interface ChordSuggestion {
   note: string;
   chord_options: ChordOption[];
+  detected_key: string;
+  key_candidates: DetectedKey[];
 }
 
 interface MelodyWithChordsProps {
@@ -167,19 +169,22 @@ const MelodyWithChords = ({
         </div>
       </div>
 
-      {/* Detected Keys */}
+      {/* Detected Keys - Global overview */}
       {detectedKeys.length > 0 && (
-        <div className="mb-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-          <h4 className="font-semibold text-gray-800 mb-2">
-            Tonalité détectée : <span className="text-indigo-600">{chosenKey}</span>
+        <div className="mb-6 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <h4 className="font-medium text-gray-700 text-sm mb-1">
+            Vue globale : <span className="text-indigo-600">{chosenKey}</span>
           </h4>
-          <div className="flex gap-3 text-sm">
+          <div className="flex gap-3 text-xs text-gray-500">
             {detectedKeys.map((key, index) => (
-              <span key={index} className="text-gray-600">
+              <span key={index}>
                 {key.tonalite} <span className="text-gray-400">({key.score.toFixed(1)})</span>
               </span>
             ))}
           </div>
+          <p className="text-xs text-gray-500 mt-2 italic">
+            💡 Chaque note affiche sa tonalité détectée localement (fenêtre glissante)
+          </p>
         </div>
       )}
 
@@ -191,6 +196,18 @@ const MelodyWithChords = ({
 
             return (
               <div key={noteIndex} className="flex flex-col items-center gap-2 min-w-[140px]">
+                {/* Tonalité détectée pour cette note */}
+                {suggestion && suggestion.detected_key && (
+                  <div className="w-full px-2 py-1 bg-blue-100 border border-blue-300 rounded text-xs text-center">
+                    <div className="font-semibold text-blue-800">{suggestion.detected_key}</div>
+                    {suggestion.key_candidates && suggestion.key_candidates.length > 0 && (
+                      <div className="text-blue-600 text-[10px] mt-0.5">
+                        {suggestion.key_candidates[0]?.score?.toFixed(1)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Note de la mélodie */}
                 <button
                   onClick={() => playNoteWithChords(noteIndex)}

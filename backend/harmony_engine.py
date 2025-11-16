@@ -14,7 +14,7 @@ class HarmonyEngineV2:
     def __init__(self):
         pass
 
-    def detecter_tonalite(self, liste_notes: list[str]) -> list[dict[str, any]]:
+    def detecter_tonalite(self, liste_notes: list[str], fenetre: Optional[int] = None) -> list[dict[str, any]]:
         """
         ALGORITHME 1: Détecteur de Tonalité
 
@@ -22,6 +22,7 @@ class HarmonyEngineV2:
 
         Args:
             liste_notes: Liste des notes de la mélodie (ex: ["C4", "E4", "G4"])
+            fenetre: Si spécifié, n'analyse que les N dernières notes (fenêtre glissante)
 
         Returns:
             Liste des 3 tonalités avec scores (ex: [{"tonalite": "Do Majeur", "score": 6}, ...])
@@ -29,8 +30,13 @@ class HarmonyEngineV2:
         if not liste_notes:
             return []
 
+        # Appliquer la fenêtre glissante si spécifiée
+        notes_a_analyser = liste_notes
+        if fenetre is not None and fenetre > 0:
+            notes_a_analyser = liste_notes[-fenetre:]
+
         # Normaliser les notes (enlever octaves et doublons)
-        notes_uniques = set(normaliser_note(note) for note in liste_notes)
+        notes_uniques = set(normaliser_note(note) for note in notes_a_analyser)
 
         # Calculer le score de compatibilité pour chaque tonalité
         scores = {}
@@ -265,33 +271,47 @@ class HarmonyEngineV2:
     def suggerer_accords_pour_melodie(
         self,
         melodie: list[str],
-        tonalite_choisie: Optional[str] = None
+        tonalite_choisie: Optional[str] = None,
+        fenetre_tonalite: int = 6
     ) -> dict[str, any]:
         """
         Fonction principale pour suggérer des accords pour toute une mélodie.
+        Réévalue la tonalité à chaque note avec une fenêtre glissante.
 
         Args:
             melodie: Liste des notes de la mélodie
             tonalite_choisie: Tonalité choisie par l'utilisateur (optionnel)
+            fenetre_tonalite: Nombre de notes à considérer pour détecter la tonalité (défaut: 6)
 
         Returns:
-            Dictionnaire avec tonalités détectées et suggestions par note
+            Dictionnaire avec tonalités détectées et suggestions par note (avec tonalité par note)
         """
-        # Détecter les tonalités possibles
-        tonalites_detectees = self.detecter_tonalite(melodie)
-
-        # Si pas de tonalité choisie, prendre la plus probable
-        if not tonalite_choisie and tonalites_detectees:
-            tonalite_choisie = tonalites_detectees[0]["tonalite"]
+        # Détecter les tonalités possibles sur toute la mélodie (pour info globale)
+        tonalites_detectees_globales = self.detecter_tonalite(melodie)
 
         # Générer les suggestions pour chaque note
         suggestions_par_note = []
         accord_precedent = None
 
-        for note in melodie:
+        for i, note in enumerate(melodie):
+            # Réévaluer la tonalité avec une fenêtre glissante
+            notes_precedentes = melodie[:i+1]  # Toutes les notes jusqu'à maintenant
+            tonalites_locales = self.detecter_tonalite(notes_precedentes, fenetre=fenetre_tonalite)
+
+            # Choisir la tonalité
+            if tonalite_choisie:
+                # L'utilisateur a forcé une tonalité
+                tonalite_actuelle = tonalite_choisie
+            elif tonalites_locales:
+                # Prendre la tonalité la plus probable pour ce moment
+                tonalite_actuelle = tonalites_locales[0]["tonalite"]
+            else:
+                # Fallback sur la tonalité globale
+                tonalite_actuelle = tonalites_detectees_globales[0]["tonalite"] if tonalites_detectees_globales else "Do Majeur"
+            # Générer les suggestions d'accords pour cette note avec la tonalité actuelle
             suggestions = self.suggerer_accords(
                 note,
-                tonalite_choisie,
+                tonalite_actuelle,
                 accord_precedent
             )
 
@@ -321,7 +341,9 @@ class HarmonyEngineV2:
 
             suggestions_par_note.append({
                 "note": note,
-                "chord_options": chord_options
+                "chord_options": chord_options,
+                "detected_key": tonalite_actuelle,  # Tonalité détectée pour cette note
+                "key_candidates": tonalites_locales[:3] if tonalites_locales else []  # Top 3 tonalités possibles
             })
 
             # L'accord "choisi" pour le contexte est le premier suggéré
@@ -329,7 +351,7 @@ class HarmonyEngineV2:
                 accord_precedent = chord_options[0]["name"]
 
         return {
-            "detected_keys": tonalites_detectees,
-            "chosen_key": tonalite_choisie,
+            "detected_keys": tonalites_detectees_globales,
+            "chosen_key": tonalite_choisie if tonalite_choisie else (tonalites_detectees_globales[0]["tonalite"] if tonalites_detectees_globales else "Do Majeur"),
             "suggestions": suggestions_par_note
         }

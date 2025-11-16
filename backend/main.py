@@ -21,6 +21,7 @@ harmony_engine = HarmonyEngineV2()
 class MelodyRequest(BaseModel):
     notes: list[str]  # e.g., ["C4", "E4", "G4", "A4"]
     chosen_key: Optional[str] = None  # Tonalité choisie par l'utilisateur
+    window_size: Optional[int] = 6  # Taille de la fenêtre glissante pour détection de tonalité
 
 
 class DetectedKey(BaseModel):
@@ -38,6 +39,8 @@ class ChordOption(BaseModel):
 class ChordSuggestion(BaseModel):
     note: str
     chord_options: list[ChordOption]
+    detected_key: str  # Tonalité détectée pour cette note spécifique
+    key_candidates: list[DetectedKey]  # Top 3 tonalités candidates pour cette note
 
 
 class SuggestionResponse(BaseModel):
@@ -55,15 +58,17 @@ async def root():
 async def suggest_chords(request: MelodyRequest):
     """
     Analyse une mélodie et suggère des accords intelligemment.
+    Réévalue la tonalité à chaque note avec une fenêtre glissante.
 
     Retourne:
-    - Les 3 tonalités les plus probables
+    - Les 3 tonalités les plus probables (globales)
     - La tonalité choisie (auto ou par l'utilisateur)
-    - Les suggestions d'accords par note avec explications
+    - Les suggestions d'accords par note avec tonalités détectées et explications
     """
     result = harmony_engine.suggerer_accords_pour_melodie(
         melodie=request.notes,
-        tonalite_choisie=request.chosen_key
+        tonalite_choisie=request.chosen_key,
+        fenetre_tonalite=request.window_size or 6
     )
     return result
 

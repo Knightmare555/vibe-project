@@ -34,6 +34,7 @@ function App() {
   const [chosenKey, setChosenKey] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [algorithm, setAlgorithm] = useState<'hmm' | 'scoring'>('hmm');
 
   const handleNotePlay = (note: string) => {
     setMelody((prev) => [...prev, note]);
@@ -59,7 +60,10 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notes: melody }),
+        body: JSON.stringify({
+          notes: melody,
+          algorithm: algorithm
+        }),
       });
 
       if (!response.ok) {
@@ -92,6 +96,40 @@ function App() {
           <p className="text-sm text-white/70 mt-2">
             Jouez une mélodie et obtenez des suggestions d'accords harmoniques
           </p>
+        </div>
+
+        {/* Algorithm Selector */}
+        <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-white font-medium">Algorithme de détection :</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAlgorithm('hmm')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  algorithm === 'hmm'
+                    ? 'bg-indigo-600 text-white shadow-lg'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                HMM (Markov)
+              </button>
+              <button
+                onClick={() => setAlgorithm('scoring')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  algorithm === 'scoring'
+                    ? 'bg-indigo-600 text-white shadow-lg'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                Scoring Simple
+              </button>
+            </div>
+          </div>
+          <div className="text-center mt-2 text-sm text-white/70">
+            {algorithm === 'hmm'
+              ? '🎯 Modèle de Markov Caché - Meilleur pour les modulations'
+              : '⚡ Algorithme de scoring - Plus rapide et simple'}
+          </div>
         </div>
 
         {/* Piano */}

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from harmony_engine import HarmonyEngineV2
+from harmony_engine import HarmonyEngine
 
 app = FastAPI(title="Vibe - Chord Progression Generator")
 
@@ -15,13 +15,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-harmony_engine = HarmonyEngineV2()
+harmony_engine = HarmonyEngine()
 
 
 class MelodyRequest(BaseModel):
     notes: list[str]  # e.g., ["C4", "E4", "G4", "A4"]
     chosen_key: Optional[str] = None  # Tonalité choisie par l'utilisateur
     window_size: Optional[int] = 6  # Taille de la fenêtre glissante pour détection de tonalité
+    algorithm: Optional[str] = "hmm"  # "scoring" ou "hmm" (défaut: hmm)
 
 
 class DetectedKey(BaseModel):
@@ -60,6 +61,10 @@ async def suggest_chords(request: MelodyRequest):
     Analyse une mélodie et suggère des accords intelligemment.
     Réévalue la tonalité à chaque note avec une fenêtre glissante.
 
+    Algorithmes disponibles:
+    - "hmm": Modèle de Markov Caché (défaut) - Meilleur pour les modulations
+    - "scoring": Algorithme de scoring simple - Plus rapide
+
     Retourne:
     - Les 3 tonalités les plus probables (globales)
     - La tonalité choisie (auto ou par l'utilisateur)
@@ -68,7 +73,8 @@ async def suggest_chords(request: MelodyRequest):
     result = harmony_engine.suggerer_accords_pour_melodie(
         melodie=request.notes,
         tonalite_choisie=request.chosen_key,
-        fenetre_tonalite=request.window_size or 6
+        fenetre_tonalite=request.window_size or 6,
+        algorithm=request.algorithm or "hmm"
     )
     return result
 

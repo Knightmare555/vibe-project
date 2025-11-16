@@ -35,8 +35,9 @@ class HarmonyEngineV2:
         if fenetre is not None and fenetre > 0:
             notes_a_analyser = liste_notes[-fenetre:]
 
-        # Normaliser les notes (enlever octaves et doublons)
-        notes_uniques = set(normaliser_note(note) for note in notes_a_analyser)
+        # Normaliser les notes (enlever octaves) et compter les occurrences
+        from collections import Counter
+        notes_comptees = Counter(normaliser_note(note) for note in notes_a_analyser)
 
         # Calculer le score de compatibilité pour chaque tonalité
         scores = {}
@@ -44,7 +45,7 @@ class HarmonyEngineV2:
         for tonalite, gamme in GAMMES.items():
             score = 0
             # Pondération musicale basée sur l'importance des degrés
-            for note in notes_uniques:
+            for note, frequence in notes_comptees.items():
                 note_norm = normaliser_note(note)
 
                 # Trouver le degré de la note dans cette gamme
@@ -57,22 +58,25 @@ class HarmonyEngineV2:
                     if note_equiv in gamme:
                         degre = gamme.index(note_equiv) + 1
 
-                # Attribution des points selon le degré
+                # Attribution des points selon le degré (multiplié par la fréquence)
+                points = 0
                 if degre is None:
                     # Note hors-gamme : 0 point
-                    score += 0
+                    points = 0
                 elif degre == 1:
                     # Tonique (Degré I) : +3 points
-                    score += 3
+                    points = 3
                 elif degre == 5:
                     # Dominante (Degré V) : +2 points
-                    score += 2
+                    points = 2
                 elif degre == 7:
                     # Sensible (Degré VII) : +2 points
-                    score += 2
+                    points = 2
                 else:
                     # Autres notes diatoniques (II, III, IV, VI) : +1 point
-                    score += 1
+                    points = 1
+
+                score += points * frequence
 
             scores[tonalite] = score
 

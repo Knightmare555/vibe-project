@@ -5,6 +5,7 @@ import MelodyWithChords from './components/MelodyWithChords';
 interface DetectedKey {
   tonalite: string;
   score: number;
+  color: string;
 }
 
 interface ChordOption {
@@ -18,6 +19,7 @@ interface ChordSuggestion {
   note: string;
   chord_options: ChordOption[];
   detected_key: string;
+  detected_key_color: string;
   key_candidates: DetectedKey[];
 }
 

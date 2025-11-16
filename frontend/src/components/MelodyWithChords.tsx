@@ -5,6 +5,7 @@ import { convertNoteToFrench, convertChordNameToFrench } from '../utils/noteConv
 interface DetectedKey {
   tonalite: string;
   score: number;
+  color: string;
 }
 
 interface ChordOption {
@@ -18,6 +19,7 @@ interface ChordSuggestion {
   note: string;
   chord_options: ChordOption[];
   detected_key: string;
+  detected_key_color: string;
   key_candidates: DetectedKey[];
 }
 
@@ -175,10 +177,19 @@ const MelodyWithChords = ({
           <h4 className="font-medium text-gray-700 text-sm mb-1">
             Vue globale : <span className="text-indigo-600">{chosenKey}</span>
           </h4>
-          <div className="flex gap-3 text-xs text-gray-500">
+          <div className="flex gap-3 text-xs">
             {detectedKeys.map((key, index) => (
-              <span key={index}>
-                {key.tonalite} <span className="text-gray-400">({key.score.toFixed(1)})</span>
+              <span
+                key={index}
+                className="px-2 py-1 rounded"
+                style={{
+                  backgroundColor: key.color + '20',
+                  borderLeft: `3px solid ${key.color}`,
+                  color: key.color
+                }}
+              >
+                <span className="font-semibold">{key.tonalite}</span>
+                <span className="opacity-70"> ({key.score.toFixed(1)})</span>
               </span>
             ))}
           </div>
@@ -198,10 +209,17 @@ const MelodyWithChords = ({
               <div key={noteIndex} className="flex flex-col items-center gap-2 min-w-[140px]">
                 {/* Tonalité détectée pour cette note */}
                 {suggestion && suggestion.detected_key && (
-                  <div className="w-full px-2 py-1 bg-blue-100 border border-blue-300 rounded text-xs text-center">
-                    <div className="font-semibold text-blue-800">{suggestion.detected_key}</div>
+                  <div
+                    className="w-full px-2 py-1 rounded text-xs text-center border-2"
+                    style={{
+                      backgroundColor: (suggestion.detected_key_color || '#3b82f6') + '15',
+                      borderColor: suggestion.detected_key_color || '#3b82f6',
+                      color: suggestion.detected_key_color || '#1e40af'
+                    }}
+                  >
+                    <div className="font-semibold">{suggestion.detected_key}</div>
                     {suggestion.key_candidates && suggestion.key_candidates.length > 0 && (
-                      <div className="text-blue-600 text-[10px] mt-0.5">
+                      <div className="text-[10px] mt-0.5 opacity-70">
                         {suggestion.key_candidates[0]?.score?.toFixed(1)}
                       </div>
                     )}

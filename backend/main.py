@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from harmony_engine import HarmonyEngine
+from music_palette import COULEURS_TONALITES, get_couleur_tonalite
 
 app = FastAPI(title="Vibe - Chord Progression Generator")
 
@@ -28,6 +29,7 @@ class MelodyRequest(BaseModel):
 class DetectedKey(BaseModel):
     tonalite: str
     score: float
+    color: str
 
 
 class ChordOption(BaseModel):
@@ -41,6 +43,7 @@ class ChordSuggestion(BaseModel):
     note: str
     chord_options: list[ChordOption]
     detected_key: str  # Tonalité détectée pour cette note spécifique
+    detected_key_color: str  # Couleur de la tonalité détectée
     key_candidates: list[DetectedKey]  # Top 3 tonalités candidates pour cette note
 
 
@@ -76,6 +79,17 @@ async def suggest_chords(request: MelodyRequest):
         fenetre_tonalite=request.window_size or 6,
         algorithm=request.algorithm or "hmm"
     )
+
+    # Ajouter les couleurs aux tonalités détectées
+    for key in result["detected_keys"]:
+        key["color"] = get_couleur_tonalite(key["tonalite"])
+
+    # Ajouter les couleurs aux suggestions par note
+    for suggestion in result["suggestions"]:
+        suggestion["detected_key_color"] = get_couleur_tonalite(suggestion["detected_key"])
+        for candidate in suggestion.get("key_candidates", []):
+            candidate["color"] = get_couleur_tonalite(candidate["tonalite"])
+
     return result
 
 
